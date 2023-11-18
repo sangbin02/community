@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>익명 게시판</title>
+    <link rel="stylesheet" href="styles.css"> <!-- 외부 CSS 파일 연결 -->
+</head>
+<body>
+    <div id="banner">
+        <h1>게시판 제목</h1>
+        <p id="boardIntro">게시판 소개글이나 다양한 정보를 여기에 작성하세요.</p>
+    </div>
+
+    <div>
+        <input type="text" id="inputNickname" placeholder="닉네임을 입력하세요">
+        <textarea id="inputMessage" placeholder="메시지를 입력하세요"></textarea>
+        <input type="file" id="fileInput" class="comment-input">
+        <button class="btnWrite" onclick="writePost()">글쓰기</button>
+    </div>
+
+    <ul id="messages"></ul>
+
+    <script>
+        function writePost() {
+    var nicknameInput = document.getElementById('inputNickname');
+    var messageInput = document.getElementById('inputMessage');
+    var fileInput = document.getElementById('fileInput');
+
+    var nickname = nicknameInput.value;
+    var message = messageInput.value;
+
+    if (nickname.trim() === '' || message.trim() === '') {
+        alert('닉네임과 메시지를 모두 입력하세요.');
+        return;
+    }
+
+    // 메시지를 리스트에 추가
+    var messagesList = document.getElementById('messages');
+    var messageDiv = document.createElement('div');
+    messageDiv.className = 'message';
+
+    // 닉네임과 내용 표시
+    var headerDiv = document.createElement('div');
+    headerDiv.className = 'header';
+    headerDiv.appendChild(document.createTextNode('닉네임: ' + nickname));
+    messageDiv.appendChild(headerDiv);
+
+    var contentDiv = document.createElement('div');
+    contentDiv.className = 'content';
+    contentDiv.appendChild(document.createTextNode('내용: ' + message));
+    messageDiv.appendChild(contentDiv);
+
+    // 좋아요 버튼 추가
+    var likeButton = document.createElement('span');
+    likeButton.className = 'likes';
+    likeButton.onclick = function () {
+        likeMessage(messageDiv);
+    };
+    likeButton.appendChild(document.createTextNode('👍 0'));
+    messageDiv.appendChild(likeButton);
+
+    // 사진 첨부 기능
+    if (fileInput.files.length > 0) {
+        var image = document.createElement('img');
+        image.src = URL.createObjectURL(fileInput.files[0]);
+        messageDiv.appendChild(image);
+    }
+
+    // 댓글 입력 필드 추가
+    var commentsDiv = document.createElement('div');
+    commentsDiv.className = 'comments';
+
+    var commentNicknameInput = document.createElement('input');
+    commentNicknameInput.type = 'text';
+    commentNicknameInput.placeholder = '댓글 작성자 닉네임';
+    commentNicknameInput.className = 'comment-input';
+    commentsDiv.appendChild(commentNicknameInput);
+
+    var commentInput = document.createElement('input');
+    commentInput.type = 'text';
+    commentInput.placeholder = '댓글을 입력하세요';
+    commentInput.className = 'comment-input';
+    commentsDiv.appendChild(commentInput);
+
+    // 댓글 전송 버튼 추가
+    var btnComment = document.createElement('button');
+    btnComment.className = 'btnComment';
+    btnComment.appendChild(document.createTextNode('댓글 등록'));
+    btnComment.onclick = function () {
+        addComment(messageDiv, commentNicknameInput.value, commentInput.value);
+    };
+    commentsDiv.appendChild(btnComment);
+
+    messageDiv.appendChild(commentsDiv);
+
+    // 리스트의 맨 앞에 추가
+    messagesList.insertBefore(messageDiv, messagesList.firstChild);
+
+    // 입력 필드 초기화
+    nicknameInput.value = '';
+    messageInput.value = '';
+    fileInput.value = '';
+    commentNicknameInput.value = '';
+    commentInput.value = '';
+
+    // 댓글 보기/접기 토글 버튼
+    var toggleCommentsButton = document.createElement('button');
+    toggleCommentsButton.className = 'toggleCommentsButton';
+    toggleCommentsButton.appendChild(document.createTextNode('댓글 보기/접기'));
+    toggleCommentsButton.onclick = function () {
+        toggleComments(commentsDiv);
+    };
+    messageDiv.appendChild(toggleCommentsButton);
+}
+
+
+        function toggleComments(commentsDiv) {
+            commentsDiv.style.display = commentsDiv.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addComment(messageDiv, commentNickname, comment) {
+            var commentsDiv = messageDiv.querySelector('.comments');
+            var commentDiv = document.createElement('div');
+            commentDiv.className = 'comment';
+            commentDiv.appendChild(document.createTextNode(commentNickname + ': ' + comment));
+            commentsDiv.appendChild(commentDiv);
+        }
+
+        function likeMessage(messageDiv) {
+            var likesSpan = messageDiv.querySelector('.likes');
+            var likeCount = parseInt(likesSpan.textContent.split(' ')[1]) + 1;
+            likesSpan.textContent = '👍 ' + likeCount;
+            likesSpan.style.color = 'red';
+            likesSpan.onclick = null;  // 좋아요 중복 클릭 방지
+        }
+    </script>
+</body>
+</html>
